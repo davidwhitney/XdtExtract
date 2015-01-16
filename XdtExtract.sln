@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E2135C03-9325-4156-9150-CCF4CEF4C862}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{307F3085-47F0-4E6A-91EC-2ABCFC1C22DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XdtExtract", "src\XdtExtract\XdtExtract.csproj", "{CD9A15E0-B18D-4637-8C10-066E536EF27E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XdtExtract.Test.Unit", "tests\XdtExtract.Test.Unit\XdtExtract.Test.Unit.csproj", "{6760D711-23FF-4D00-AB1E-DCEC071E140F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{59918542-B3E6-453C-B006-E6C06B76295C}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CD9A15E0-B18D-4637-8C10-066E536EF27E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD9A15E0-B18D-4637-8C10-066E536EF27E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD9A15E0-B18D-4637-8C10-066E536EF27E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD9A15E0-B18D-4637-8C10-066E536EF27E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6760D711-23FF-4D00-AB1E-DCEC071E140F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6760D711-23FF-4D00-AB1E-DCEC071E140F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6760D711-23FF-4D00-AB1E-DCEC071E140F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6760D711-23FF-4D00-AB1E-DCEC071E140F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CD9A15E0-B18D-4637-8C10-066E536EF27E} = {E2135C03-9325-4156-9150-CCF4CEF4C862}
+		{6760D711-23FF-4D00-AB1E-DCEC071E140F} = {307F3085-47F0-4E6A-91EC-2ABCFC1C22DA}
+	EndGlobalSection
+EndGlobal
