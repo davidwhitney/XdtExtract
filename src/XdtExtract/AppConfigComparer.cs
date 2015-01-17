@@ -7,15 +7,17 @@ namespace XdtExtract
 
     public class AppConfigComparer
     {
-        public IEnumerable<Diff> Compare(string baseConfig, string comparisonConfig)
+        public IEnumerable<Diff> Compare(string @base, string comparison)
         {
-            var baseDoc = XDocument.Parse(baseConfig);
-            var comparisonDoc = XDocument.Parse(comparisonConfig); 
-            
+            return Compare(XDocument.Parse(@base), XDocument.Parse(comparison));
+        }
+
+        public IEnumerable<Diff> Compare(XDocument @base, XDocument comparison)
+        {
             var diffs = new List<Diff>();
 
-            var baseDocSettings = baseDoc.AppSettings().Select(x => new  { Source = "base", Node = x });
-            var comparisonDocSettings = comparisonDoc.AppSettings().Select(x => new  { Source = "comparison", Node = x });
+            var baseDocSettings = @base.AppSettings().Select(x => new  { Source = "base", Node = x });
+            var comparisonDocSettings = comparison.AppSettings().Select(x => new  { Source = "comparison", Node = x });
             var groups = baseDocSettings.Union(comparisonDocSettings).GroupBy(x => x.Node.Attributes().Key());
 
             foreach (var group in groups)
@@ -27,11 +29,7 @@ namespace XdtExtract
                         XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
                         Operation = @group.First().Source == "base" ? Operation.Remove : Operation.Add
                     });
-
-                    continue;
                 }
-
-
             }
 
 
