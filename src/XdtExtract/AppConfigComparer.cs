@@ -56,24 +56,38 @@ namespace XdtExtract
             
             var diffs = new List<Diff>();
 
-            foreach (var settingPair in IterateOver.Pairs(baseDoc, comparisonDoc))
+
+            var bothAppSettingsSets = new List<Tuple<string, XElement>>();
+            bothAppSettingsSets.AddRange(baseDoc.AppSettings().Select(x => new Tuple<string, XElement>("src", x)));
+            bothAppSettingsSets.AddRange(comparisonDoc.AppSettings().Select(x => new Tuple<string, XElement>("dest", x)));
+
+            var groups = bothAppSettingsSets.GroupBy(x => x.Item2.Attributes().Key());
+
+            foreach (var group in groups)
             {
-                if (settingPair.ComparisonItem == null)
+                if (group.Count() == 1)
                 {
-                    diffs.Add(new Diff
+                    if (group.First().Item1 == "src")
                     {
-                        Operation = Operation.Remove,
-                        XPath = "/configuration/appSettings/add[@key=\""+settingPair.BaseItem+"\"]"
-                    });
+                        diffs.Add(new Diff
+                        {
+                            Operation = Operation.Remove,
+                            XPath = "/configuration/appSettings/add[@key='" + group.Key + "']"
+                        });
+                    }
+                    else if (group.First().Item1 == "dest")
+                    {
+                        diffs.Add(new Diff
+                        {
+                            Operation = Operation.Add,
+                            XPath = "/configuration/appSettings/add[@key='" + group.Key + "']"
+                        });
+                        
+                    }
                 }
-
-                foreach (var attribute in settingPair.BaseItem.Attributes())
-                {
-                    
-                }
-
-                Debug.WriteLine(settingPair.BaseItem.Name);
             }
+
+
 
             return diffs;
         }
