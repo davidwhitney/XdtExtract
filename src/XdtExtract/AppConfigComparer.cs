@@ -4,7 +4,6 @@ using System.Xml.Linq;
 
 namespace XdtExtract
 {
-
     public class AppConfigComparer
     {
         public IEnumerable<Diff> Compare(string @base, string comparison)
@@ -16,11 +15,7 @@ namespace XdtExtract
         {
             var diffs = new List<Diff>();
 
-            var baseDocSettings = @base.AppSettings().Select(x => new  { Source = "base", Node = x });
-            var comparisonDocSettings = comparison.AppSettings().Select(x => new  { Source = "comparison", Node = x });
-            var groups = baseDocSettings.Union(comparisonDocSettings).GroupBy(x => x.Node.Attributes().Key());
-
-            foreach (var group in groups)
+            foreach (var group in GroupedAppSettings(@base, comparison))
             {
                 if (group.Count() == 1)
                 {
@@ -34,6 +29,19 @@ namespace XdtExtract
 
 
             return diffs;
+        }
+
+        private static IEnumerable<IGrouping<string, GroupedAppSetting>> GroupedAppSettings(XDocument @base, XDocument comparison)
+        {
+            var baseDocSettings = @base.AppSettings().Select(x => new GroupedAppSetting {Source = "base", Node = x});
+            var comparisonDocSettings = comparison.AppSettings().Select(x => new GroupedAppSetting {Source = "comparison", Node = x});
+            return baseDocSettings.Union(comparisonDocSettings).GroupBy(x => x.Node.Attributes().Key());
+        }
+
+        private class GroupedAppSetting
+        {
+            public string Source { get; set; }
+            public XElement Node { get; set; }
         }
     }
 
