@@ -24,6 +24,32 @@ namespace XdtExtract
                         XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
                         Operation = @group.First().Source == "base" ? Operation.Remove : Operation.Add
                     });
+
+                    continue;
+                }
+
+                foreach (var attributeGroup in GroupedAttributes(group))
+                {
+                    if (attributeGroup.Count() == 2)
+                    {
+                        var first = attributeGroup.First();
+                        var second = attributeGroup.Skip(1).First();
+
+                        if (first.Item.Value == second.Item.Value)
+                        {
+                            continue;
+                        }
+
+                        diffs.Add(new Diff
+                        {
+                            XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
+                            Operation = Operation.Modify,
+                            NewValue = second.Item.Value
+                        });
+
+                        continue;
+                    }
+                    
                 }
             }
 
@@ -31,17 +57,29 @@ namespace XdtExtract
             return diffs;
         }
 
-        private static IEnumerable<IGrouping<string, GroupedAppSetting>> GroupedAppSettings(XDocument @base, XDocument comparison)
+        private static IEnumerable<IGrouping<string, Grouped<XElement>>> GroupedAppSettings(XDocument @base, XDocument comparison)
         {
-            var baseDocSettings = @base.AppSettings().Select(x => new GroupedAppSetting {Source = "base", Node = x});
-            var comparisonDocSettings = comparison.AppSettings().Select(x => new GroupedAppSetting {Source = "comparison", Node = x});
-            return baseDocSettings.Union(comparisonDocSettings).GroupBy(x => x.Node.Attributes().Key());
+            var baseGrp = @base.AppSettings().Select(x => new Grouped<XElement> { Source = "base", Item = x });
+            var compGrp = comparison.AppSettings().Select(x => new Grouped<XElement> { Source = "comparison", Item = x });
+            return baseGrp.Union(compGrp).GroupBy(x => x.Item.Attributes().Key());
         }
 
-        private class GroupedAppSetting
+        private static IEnumerable<IGrouping<string, Grouped<XAttribute>>> GroupedAttributes(IGrouping<string, Grouped<XElement>> group)
+        {
+            return GroupedAttributes(group.First().Item, group.Skip(1).First().Item);
+        }
+
+        private static IEnumerable<IGrouping<string, Grouped<XAttribute>>> GroupedAttributes(XElement @base, XElement comparison)
+        {
+            var baseGrp = @base.Attributes().Select(x => new Grouped<XAttribute> { Source = "base", Item = x });
+            var compGrp = comparison.Attributes().Select(x => new Grouped<XAttribute> { Source = "comparison", Item = x });
+            return baseGrp.Union(compGrp).GroupBy(x => x.Item.Name.LocalName);
+        }
+
+        private class Grouped<T>
         {
             public string Source { get; set; }
-            public XElement Node { get; set; }
+            public T Item { get; set; }
         }
     }
 
@@ -67,6 +105,7 @@ namespace XdtExtract
     {
         public string XPath { get; set; }
         public Operation Operation { get; set; }
+        public string NewValue { get; set; }
     }
 
     public enum Operation
