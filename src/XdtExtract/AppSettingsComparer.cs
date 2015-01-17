@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -17,78 +18,111 @@ namespace XdtExtract
                     diffs.Add(new Diff
                     {
                         XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
-                        Operation = @group.First().Source == "base" ? Operation.Remove : Operation.Add
+                        DifferenceType = DifferenceType.Value,
+                        Key = @group.Key,
+                        Type = @group.First().Source == Source.BaseFile ? Operation.Remove : Operation.Add
                     });
 
                     continue;
                 }
 
-                CompareAttributes(@group, diffs);
+                CompareAttributes(group.Key, GroupAttributesByKey(@group), diffs);
             }
             return diffs;
         }
 
-        private static void CompareAttributes(IGrouping<string, Grouped<XElement>> @group, List<Diff> diffs)
+        private static void CompareAttributes(string elementKey, IEnumerable<IGrouping<string, Grouped<XAttribute>>> @group, List<Diff> diffs)
         {
-            foreach (var attributeGroup in GroupedAttributes(@group))
+            foreach (var groupOfIdenticallyNamedAttributes in @group)
             {
-                if (attributeGroup.Count() == 1)
+                if (groupOfIdenticallyNamedAttributes.Count() > 2)
                 {
-                    diffs.Add(new Diff
-                    {
-                        XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
-                        Operation = attributeGroup.First().Source == "base" ? Operation.Remove : Operation.Add,
-                        NewValue = attributeGroup.First().Item.Value
-                    });
+                    throw new Exception("More than 2 attributes for appSettings key " + groupOfIdenticallyNamedAttributes.Key + " exists - this is probably an error");
+                }
 
+                if (groupOfIdenticallyNamedAttributes.Count() == 1)
+                {
+                    ProcessAttributeOnlyPresentInOneSource(elementKey, diffs, groupOfIdenticallyNamedAttributes);
                     continue;
                 }
 
-                if (attributeGroup.Count() == 2)
+                if (groupOfIdenticallyNamedAttributes.Count() == 2)
                 {
-                    var first = attributeGroup.First();
-                    var second = attributeGroup.Skip(1).First();
-
-                    if (first.Item.Value == second.Item.Value)
+                    if (AllAttributesHaveTheSameValue(groupOfIdenticallyNamedAttributes))
                     {
                         continue;
                     }
 
-                    diffs.Add(new Diff
-                    {
-                        XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
-                        Operation = Operation.Modify,
-                        NewValue = second.Item.Value
-                    });
-
-                    continue;
+                    ProcessModifiedAttribute(elementKey, diffs, groupOfIdenticallyNamedAttributes.Skip(1).First());
                 }
             }
         }
 
+        private static bool AllAttributesHaveTheSameValue(IGrouping<string, Grouped<XAttribute>> groupOfIdenticallyNamedAttributes)
+        {
+            var first = groupOfIdenticallyNamedAttributes.First();
+            var second = groupOfIdenticallyNamedAttributes.Skip(1).First();
+            return first.Item.Value == second.Item.Value;
+        }
+
+        private static void ProcessModifiedAttribute(string key, List<Diff> diffs, Grouped<XAttribute> second)
+        {
+            diffs.Add(new Diff
+            {
+                XPath = "/configuration/appSettings/add[@key='" + key + "']",
+                Type = Operation.Modify,
+                Key = second.Item.Name.LocalName,
+                NewValue = second.Item.Value,
+                DifferenceType = DifferenceType.Attribute
+            });
+        }
+
+        private static void ProcessAttributeOnlyPresentInOneSource(string key, List<Diff> diffs, IGrouping<string, Grouped<XAttribute>> attributeGroup)
+        {
+            var source = attributeGroup.First().Source;
+            var itemThatIsOnlyInOneFile = attributeGroup.First().Item;
+
+            diffs.Add(new Diff
+            {
+                XPath = "/configuration/appSettings/add[@key='" + key + "']",
+                DifferenceType = DifferenceType.Value,
+                Key = attributeGroup.Key,
+                Type = source == Source.ComparisonFile ? Operation.Add : Operation.Remove,
+                NewValue = itemThatIsOnlyInOneFile.Value
+            });
+        }
+
         private static IEnumerable<IGrouping<string, Grouped<XElement>>> AppSettingsGroupedByKey(XDocument @base, XDocument comparison)
         {
-            var baseGrp = @base.AppSettings().Select(x => new Grouped<XElement> { Source = "base", Item = x });
-            var compGrp = comparison.AppSettings().Select(x => new Grouped<XElement> { Source = "comparison", Item = x });
+            var baseGrp = @base.AppSettings().Select(x => new Grouped<XElement> { Source = Source.BaseFile, Item = x });
+            var compGrp = comparison.AppSettings().Select(x => new Grouped<XElement> { Source = Source.ComparisonFile, Item = x });
             return baseGrp.Union(compGrp).GroupBy(x => x.Item.Attributes().Key());
         }
 
-        private static IEnumerable<IGrouping<string, Grouped<XAttribute>>> GroupedAttributes(IGrouping<string, Grouped<XElement>> group)
+        private static IEnumerable<IGrouping<string, Grouped<XAttribute>>> GroupAttributesByKey(IGrouping<string, Grouped<XElement>> group)
         {
-            return GroupedAttributes(group.First().Item, group.Skip(1).First().Item);
+            return GroupAttributesByKey(group.First().Item, group.Skip(1).First().Item);
         }
 
-        private static IEnumerable<IGrouping<string, Grouped<XAttribute>>> GroupedAttributes(XElement @base, XElement comparison)
+        private static IEnumerable<IGrouping<string, Grouped<XAttribute>>> GroupAttributesByKey(XElement @base, XElement comparison)
         {
-            var baseGrp = @base.Attributes().Select(x => new Grouped<XAttribute> { Source = "base", Item = x });
-            var compGrp = comparison.Attributes().Select(x => new Grouped<XAttribute> { Source = "comparison", Item = x });
+            var baseGrp = @base.Attributes().Select(x => new Grouped<XAttribute> { Source = Source.BaseFile, Item = x });
+            var compGrp = comparison.Attributes().Select(x => new Grouped<XAttribute> { Source = Source.ComparisonFile, Item = x });
             return baseGrp.Union(compGrp).GroupBy(x => x.Item.Name.LocalName);
         }
 
         private class Grouped<T>
         {
-            public string Source { get; set; }
+            public Source Source { get; set; }
             public T Item { get; set; }
+
+        }
+
+        private enum Source
+        {
+            BaseFile,
+            ComparisonFile
         }
     }
+
 }
