@@ -1,51 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace XdtExtract
 {
-    public class IterateOver
-    {
-        public static IEnumerable<ComparisonPair<XElement>> Pairs(XDocument baseDoc, XDocument comparisonDoc)
-        {
-            var baseKeys = new List<string>();
-
-            foreach (var appSetting in baseDoc.AppSettings())
-            {
-                var sourceSettingKey = appSetting.Attributes().Key();
-                var comparisonSetting = comparisonDoc.AppSettings().SettingOrDefault(sourceSettingKey);
-
-                baseKeys.Add(sourceSettingKey);
-
-                yield return new ComparisonPair<XElement>(appSetting, comparisonSetting);
-            }
-
-            foreach (var otherSetting in comparisonDoc.AppSettings())
-            {
-                var key = otherSetting.Attributes().Key();
-
-                if (!baseKeys.Contains(key))
-                {
-                   yield return new ComparisonPair<XElement>(null, otherSetting); 
-                }
-            }
-        }
-    }
-
-    public class ComparisonPair<T>
-    {
-        public T BaseItem { get; set; }
-        public T ComparisonItem { get; set; }
-
-        public ComparisonPair(T baseItem, T comparisonItem)
-        {
-            BaseItem = baseItem;
-            ComparisonItem = comparisonItem;
-        }
-    }
 
     public class AppConfigComparer
     {
@@ -56,37 +14,25 @@ namespace XdtExtract
             
             var diffs = new List<Diff>();
 
-
-            var bothAppSettingsSets = new List<Tuple<string, XElement>>();
-            bothAppSettingsSets.AddRange(baseDoc.AppSettings().Select(x => new Tuple<string, XElement>("src", x)));
-            bothAppSettingsSets.AddRange(comparisonDoc.AppSettings().Select(x => new Tuple<string, XElement>("dest", x)));
-
-            var groups = bothAppSettingsSets.GroupBy(x => x.Item2.Attributes().Key());
+            var baseDocSettings = baseDoc.AppSettings().Select(x => new  { Source = "base", Node = x });
+            var comparisonDocSettings = comparisonDoc.AppSettings().Select(x => new  { Source = "comparison", Node = x });
+            var groups = baseDocSettings.Union(comparisonDocSettings).GroupBy(x => x.Node.Attributes().Key());
 
             foreach (var group in groups)
             {
                 if (group.Count() == 1)
                 {
-                    if (group.First().Item1 == "src")
+                    diffs.Add(new Diff
                     {
-                        diffs.Add(new Diff
-                        {
-                            Operation = Operation.Remove,
-                            XPath = "/configuration/appSettings/add[@key='" + group.Key + "']"
-                        });
-                    }
-                    else if (group.First().Item1 == "dest")
-                    {
-                        diffs.Add(new Diff
-                        {
-                            Operation = Operation.Add,
-                            XPath = "/configuration/appSettings/add[@key='" + group.Key + "']"
-                        });
-                        
-                    }
-                }
-            }
+                        XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
+                        Operation = @group.First().Source == "base" ? Operation.Remove : Operation.Add
+                    });
 
+                    continue;
+                }
+
+
+            }
 
 
             return diffs;
