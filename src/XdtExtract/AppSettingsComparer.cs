@@ -32,6 +32,18 @@ namespace XdtExtract
         {
             foreach (var attributeGroup in GroupedAttributes(@group))
             {
+                if (attributeGroup.Count() == 1)
+                {
+                    diffs.Add(new Diff
+                    {
+                        XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
+                        Operation = attributeGroup.First().Source == "base" ? Operation.Remove : Operation.Add,
+                        NewValue = attributeGroup.First().Item.Value
+                    });
+
+                    continue;
+                }
+
                 if (attributeGroup.Count() == 2)
                 {
                     var first = attributeGroup.First();
