@@ -5,14 +5,14 @@ using NUnit.Framework;
 namespace XdtExtract.Test.Unit
 {
     [TestFixture]
-    public class AppConfigComparerTests
+    public class AppSettingsComparerTests
     {
-        private AppConfigComparer _comparer;
+        private AppSettingsComparer _comparer;
 
         [SetUp]
         public void SetUp()
         {
-            _comparer = new AppConfigComparer();
+            _comparer = new AppSettingsComparer();
         }
 
         [Test]
@@ -49,6 +49,7 @@ namespace XdtExtract.Test.Unit
 
             Assert.That(diffs[0].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
             Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Modify));
+            Assert.That(diffs[0].NewValue, Is.EqualTo("false"));
         }
 
 
