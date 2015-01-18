@@ -15,24 +15,36 @@ namespace XdtExtract
             //var baseDictionary = FlattenXml(@base);
             //var comparisonDictionary = FlattenXml(comparison);
 
+            var mapper = new XmlMapGenerator();
+            var baseMap = mapper.FlattenXml(@base);
+            var comparisonMap = mapper.FlattenXml(comparison);
 
-            foreach (var group in AppSettingsGroupedByKey(@base, comparison))
+            var targetMap = new List<XmlMapGenerator.IndexedXElement>(comparisonMap);
+            var filteredTargetMap = targetMap.Except(baseMap).ToList();
+
+            if (!filteredTargetMap.Any())
             {
-                if (group.Count() == 1)
-                {
-                    diffs.Add(new Diff
-                    {
-                        XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
-                        DifferenceType = DifferenceType.Value,
-                        Key = @group.Key,
-                        Type = @group.First().Source == Source.BaseFile ? Operation.Remove : Operation.Add
-                    });
-
-                    continue;
-                }
-
-                CompareAttributes(group.Key, GroupAttributesByKey(@group), diffs);
+                return new List<Diff>();
             }
+
+
+            //foreach (var group in AppSettingsGroupedByKey(@base, comparison))
+            //{
+            //    if (group.Count() == 1)
+            //    {
+            //        diffs.Add(new Diff
+            //        {
+            //            XPath = "/configuration/appSettings/add[@key='" + @group.Key + "']",
+            //            DifferenceType = DifferenceType.Value,
+            //            Key = @group.Key,
+            //            Type = @group.First().Source == Source.BaseFile ? Operation.Remove : Operation.Add
+            //        });
+
+            //        continue;
+            //    }
+
+            //    CompareAttributes(group.Key, GroupAttributesByKey(@group), diffs);
+            //}
             return diffs;
         }
 

@@ -15,6 +15,14 @@ namespace XdtExtract.Test.Unit
             _comparer = new AppSettingsComparer();
         }
 
+        [Test]
+        public void DetectChanges_DocumentIsIdentical_ReturnsNoChanges()
+        {
+            var diffs = _comparer.Compare(ConfigWithSettings(), ConfigWithSettings());
+
+            Assert.That(diffs, Is.Empty);
+        }
+
         [TestCase(@"<add key=""Value"" value=""true"" />", "")]
         [TestCase("", @"<add key=""Value"" value=""true"" />")]
         [TestCase(@"<add key=""Value"" value=""true"" />", @"<add key=""Value"" value=""false"" />")]

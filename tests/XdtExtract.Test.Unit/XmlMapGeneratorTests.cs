@@ -24,9 +24,31 @@ namespace XdtExtract.Test.Unit
             var diffs = _gen.FlattenXml(@base);
 
             Assert.That(diffs.Count, Is.EqualTo(3));
-            Assert.That(diffs.First().Key, Is.EqualTo("configuration"));
-            Assert.That(diffs.Skip(1).First().Key, Is.EqualTo("configuration.appSettings"));
-            Assert.That(diffs.Skip(2).First().Key, Is.EqualTo("configuration.appSettings.add"));
+            Assert.That(diffs[0].Key, Is.EqualTo("configuration"));
+            Assert.That(diffs[1].Key, Is.EqualTo("configuration.appSettings"));
+            Assert.That(diffs[2].Key, Is.EqualTo("configuration.appSettings.add"));
+        }
+
+        [Test]
+        public void FlattenXml_GivenBasicStructure_BranchNodeIdentifiedInMapping()
+        {
+            var @base = XDocument.Parse(ConfigWithSettings(@"<add key=""First"" value=""true"" />"));
+            
+            var diffs = _gen.FlattenXml(@base);
+
+            Assert.That(diffs[1].Key, Is.EqualTo("configuration.appSettings"));
+            Assert.That(diffs[1].IsLeafNode, Is.EqualTo(false));
+        }
+
+        [Test]
+        public void FlattenXml_GivenBasicStructure_LeafNodeIdentifiedInMapping()
+        {
+            var @base = XDocument.Parse(ConfigWithSettings(@"<add key=""First"" value=""true"" />"));
+            
+            var diffs = _gen.FlattenXml(@base);
+
+            Assert.That(diffs[2].Key, Is.EqualTo("configuration.appSettings.add"));
+            Assert.That(diffs[2].IsLeafNode, Is.EqualTo(true));
         }
 
         [TestCase(@"<add key=""First"" value=""true"" />
@@ -37,8 +59,8 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _gen.FlattenXml(@base);
 
-            Assert.That(diffs.Skip(2).First().Key, Is.EqualTo("configuration.appSettings.add"));
-            Assert.That(diffs.Skip(3).First().Key, Is.EqualTo("configuration.appSettings.add"));
+            Assert.That(diffs[2].Key, Is.EqualTo("configuration.appSettings.add"));
+            Assert.That(diffs[3].Key, Is.EqualTo("configuration.appSettings.add"));
         }
 
         private static string ConfigWithSettings(string xml = "")

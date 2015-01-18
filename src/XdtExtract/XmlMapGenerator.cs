@@ -1,21 +1,19 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace XdtExtract
 {
     public class XmlMapGenerator
     {
-        public List<KeyValuePair<string, IndexedXElement>> FlattenXml(XDocument @base)
+        public List<IndexedXElement> FlattenXml(XDocument @base)
         {
-            var index = new List<KeyValuePair<string, IndexedXElement>>();
+            var index = new List<IndexedXElement>();
             foreach (var node in @base.Descendants())
             {
                 var key = string.Join("", GenerateNamespace(node), node.Name.LocalName);
-                var indexed = new IndexedXElement(node);
-                index.Add(new KeyValuePair<string, IndexedXElement>(key, indexed));
-
-                Debug.WriteLine(key);
+                index.Add(new IndexedXElement(key, node));
             }
             return index;
         }
@@ -35,11 +33,48 @@ namespace XdtExtract
 
         public class IndexedXElement
         {
-            private XElement Xel { get; set; }
+            public string Key { get; set; }
+            public XElement Xel { get; set; }
 
-            public IndexedXElement(XElement xel)
+            public string InnerText
             {
+                get { return Xel.ToString(); }
+            }
+
+            public bool IsLeafNode
+            {
+                get { return !Xel.Descendants().Any(); }
+            }
+
+            public IndexedXElement(string key, XElement xel)
+            {
+                Key = key;
                 Xel = xel;
+            }
+
+            public string ComparisonKey { get { return string.Join(":", Key, InnerText); } }
+
+            public override string ToString()
+            {
+                return ComparisonKey;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((IndexedXElement) obj);
+            }
+
+            protected bool Equals(IndexedXElement other)
+            {
+                return string.Equals(ComparisonKey, other.ComparisonKey);
+            }
+
+            public override int GetHashCode()
+            {
+                return (ComparisonKey != null ? ComparisonKey.GetHashCode() : 0);
             }
         }
 
