@@ -103,7 +103,7 @@ namespace XdtExtract.Test.Unit
         }
 
         [Test]
-        public void DetectChanges_WithALoadOfRandomStuff_DetectsChanges()
+        public void DetectChanges_WithRandomDifferentContentNode_DetectsChanges()
         {
             var @base = @"<?xml version=""1.0"" encoding=""utf-8""?><configuration><a>123</a></configuration>";
             var comparison = @"<?xml version=""1.0"" encoding=""utf-8""?><configuration><a>456</a></configuration>";
@@ -114,6 +114,29 @@ namespace XdtExtract.Test.Unit
 
             Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Modify));
             Assert.That(diffs[0].FinalValue.ToString(), Is.StringContaining("<a>456</a>"));
+        }
+
+        [Test]
+        public void DetectChanges_WithRandomDifferentContentNodesThatCanOccurMoreThanOnce_RemovesBothBadNodesInsertsTwoNewOnes()
+        {
+            var @base = @"<?xml version=""1.0"" encoding=""utf-8""?><configuration><a>123</a><a>789</a></configuration>";
+            var comparison = @"<?xml version=""1.0"" encoding=""utf-8""?><configuration><a>456</a><a>987</a></configuration>";
+            
+            var diffs = _comparer.Compare(@base, comparison).ToList();
+
+            Assert.That(diffs.Count, Is.EqualTo(4));
+
+            Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Add));
+            Assert.That(diffs[0].FinalValue.ToString(), Is.EqualTo("<a>456</a>"));
+
+            Assert.That(diffs[1].Operation, Is.EqualTo(Operation.Add));
+            Assert.That(diffs[1].FinalValue.ToString(), Is.EqualTo("<a>987</a>"));
+
+            Assert.That(diffs[2].Operation, Is.EqualTo(Operation.Remove));
+            Assert.That(diffs[2].FinalValue.ToString(), Is.EqualTo("<a>123</a>"));
+
+            Assert.That(diffs[3].Operation, Is.EqualTo(Operation.Remove));
+            Assert.That(diffs[3].FinalValue.ToString(), Is.EqualTo("<a>789</a>"));
         }
 
         private static string ConfigWithSettings(string xml = "")

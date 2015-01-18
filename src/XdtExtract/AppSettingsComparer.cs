@@ -51,7 +51,9 @@ namespace XdtExtract
 
         private static void MapDeltas(IEnumerable<XmlMapGenerator.IndexedXElement> except, List<Diff> diffs, Operation op)
         {
-            foreach (var item in except.Where(x => x.HasNoChildren))
+            var exceptions = except.ToList();
+
+            foreach (var item in exceptions.Where(x => x.HasNoChildren))
             {
                 var diff = new Diff
                 {
