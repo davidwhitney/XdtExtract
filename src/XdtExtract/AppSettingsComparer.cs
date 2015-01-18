@@ -44,7 +44,7 @@ namespace XdtExtract
                     diffs.Remove(removeOp);
 
                     addOp.Operation = Operation.Modify;
-                    addOp.NewValue = addOp.NewValue;
+                    addOp.FinalValue = addOp.FinalValue;
                 }
             }
         }
@@ -57,8 +57,8 @@ namespace XdtExtract
                 {
                     FullName = item.FullName,
                     Key = item.Xel.Attributes().Key(),
-                    DifferenceType = DifferenceType.Attribute,
-                    Operation = op
+                    Operation = op,
+                    FinalValue = item.Xel
                 };
 
                 diffs.Add(diff);
