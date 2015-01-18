@@ -18,7 +18,8 @@ namespace XdtExtract
 
         public static string Key(this IEnumerable<XAttribute> src)
         {
-            return src.Single(x => x.Name == "key").Value;
+            var keyAttrib = src.SingleOrDefault(x => x.Name == "key");
+            return keyAttrib == null ? "" : keyAttrib.Value;
         } 
     }
 }

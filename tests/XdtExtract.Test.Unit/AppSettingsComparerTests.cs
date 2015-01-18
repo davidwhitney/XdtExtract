@@ -35,7 +35,7 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs[0].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
+            Assert.That(diffs[0].FullName, Is.EqualTo(@"configuration.appSettings.add"));
         }
 
         [TestCase(@"<add key=""Value"" value=""true"" />", "")]
@@ -61,7 +61,7 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs[0].Type, Is.EqualTo(Operation.Remove));
+            Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Remove));
         }
 
         [Test]
@@ -72,37 +72,37 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs[0].Type, Is.EqualTo(Operation.Add));
+            Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Add));
         }
 
         [Test]
         public void DetectChanges_WithAppConfigContainingSingleAppSettingDifference_ReturnsChange()
         {
-            var @base = ConfigWithSettings(@"<add key=""Value"" value=""true"" />");
-            var comparison = ConfigWithSettings(@"<add key=""Value"" value=""false"" />");
+            var @base = ConfigWithSettings(@"<add key=""First"" value=""true"" />");
+            var comparison = ConfigWithSettings(@"<add key=""First"" value=""false"" />");
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs[0].Type, Is.EqualTo(Operation.Modify));
+            Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Modify));
             Assert.That(diffs[0].DifferenceType, Is.EqualTo(DifferenceType.Attribute));
-            Assert.That(diffs[0].Key, Is.EqualTo("value"));
+            Assert.That(diffs[0].Key, Is.EqualTo("First"));
             Assert.That(diffs[0].NewValue, Is.EqualTo("false"));
         }
 
         [Test]
         public void DetectChanges_WithAppConfigContainingMultipleAttributeDifferences_ReturnsChange()
         {
-            var @base = ConfigWithSettings(@"<add key=""Value"" value=""true"" />");
-            var comparison = ConfigWithSettings(@"<add key=""Value"" value=""false"" value1=""blah"" />");
+            var @base = ConfigWithSettings(@"<add key=""First"" value=""true"" />");
+            var comparison = ConfigWithSettings(@"<add key=""First"" value=""false"" value1=""blah"" />");
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
             Assert.That(diffs.Count, Is.EqualTo(2));
 
-            Assert.That(diffs[0].Type, Is.EqualTo(Operation.Modify));
+            Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Modify));
             Assert.That(diffs[0].NewValue, Is.EqualTo("false"));
 
-            Assert.That(diffs[1].Type, Is.EqualTo(Operation.Add));
+            Assert.That(diffs[1].Operation, Is.EqualTo(Operation.Add));
             Assert.That(diffs[1].NewValue, Is.EqualTo("blah"));
         }
 

@@ -12,8 +12,8 @@ namespace XdtExtract
             var index = new List<IndexedXElement>();
             foreach (var node in @base.Descendants())
             {
-                var key = string.Join("", GenerateNamespace(node), node.Name.LocalName);
-                index.Add(new IndexedXElement(key, node));
+                var fullName = string.Join("", GenerateNamespace(node), node.Name.LocalName);
+                index.Add(new IndexedXElement(fullName, node));
             }
             return index;
         }
@@ -33,7 +33,7 @@ namespace XdtExtract
 
         public class IndexedXElement
         {
-            public string Key { get; set; }
+            public string FullName { get; set; }
             public XElement Xel { get; set; }
 
             public string InnerText
@@ -41,18 +41,18 @@ namespace XdtExtract
                 get { return Xel.ToString(); }
             }
 
-            public bool IsLeafNode
+            public bool HasNoChildren
             {
                 get { return !Xel.Descendants().Any(); }
             }
 
-            public IndexedXElement(string key, XElement xel)
+            public IndexedXElement(string fullName, XElement xel)
             {
-                Key = key;
+                FullName = fullName;
                 Xel = xel;
             }
 
-            public string ComparisonKey { get { return string.Join(":", Key, InnerText); } }
+            public string ComparisonKey { get { return string.Join(":", FullName, InnerText); } }
 
             public override string ToString()
             {

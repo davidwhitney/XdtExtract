@@ -4,9 +4,9 @@ namespace XdtExtract
 {
     public class Diff
     {
-        public string XPath { get; set; }
+        public string FullName { get; set; }
 
-        public Operation Type { get; set; }
+        public Operation Operation { get; set; }
         public DifferenceType DifferenceType { get; set; }
 
         public string Key { get; set; }
