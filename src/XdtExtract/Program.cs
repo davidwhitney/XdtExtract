@@ -10,6 +10,11 @@ namespace XdtExtract
     {
         static void Main(string[] args)
         {
+            // grab file one
+            // grab file two
+            // invoke comparison
+            // pipe deltas into XDT generator
+            // push XDT to disk
         }
     }
 }

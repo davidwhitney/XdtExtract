@@ -54,7 +54,7 @@ namespace XdtExtract
             }
         }
 
-        private static void MapDeltas(IEnumerable<XmlMapGenerator.IndexedXElement> except, List<Diff> diffs, Operation op)
+        private static void MapDeltas(IEnumerable<IndexedXElement> except, List<Diff> diffs, Operation op)
         {
             var exceptions = except.ToList();
 
@@ -72,7 +72,7 @@ namespace XdtExtract
             }
         }
 
-        private static bool MapsAreIdentical(List<XmlMapGenerator.IndexedXElement> comparisonMap, List<XmlMapGenerator.IndexedXElement> baseMap)
+        private static bool MapsAreIdentical(List<IndexedXElement> comparisonMap, List<IndexedXElement> baseMap)
         {
             return !comparisonMap.Except(baseMap).Any()
                    && !baseMap.Except(comparisonMap).Any();

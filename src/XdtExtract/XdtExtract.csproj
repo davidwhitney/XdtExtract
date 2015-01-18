@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IndexedXElement.cs" />
+    <Compile Include="XElementExtensions.cs" />
     <Compile Include="XmlDocComparer.cs" />
     <Compile Include="Diff.cs" />
     <Compile Include="Operation.cs" />
