@@ -7,9 +7,14 @@ namespace XdtExtract
 {
     public class AppSettingsComparer : ComparerBase
     {
+    
         public override IEnumerable<Diff> Compare(XDocument @base, XDocument comparison)
         {
             var diffs = new List<Diff>();
+
+            //var baseDictionary = FlattenXml(@base);
+            //var comparisonDictionary = FlattenXml(comparison);
+
 
             foreach (var group in AppSettingsGroupedByKey(@base, comparison))
             {
@@ -31,9 +36,10 @@ namespace XdtExtract
             return diffs;
         }
 
-        private static void CompareAttributes(string elementKey, IEnumerable<IGrouping<string, Grouped<XAttribute>>> @group, List<Diff> diffs)
+
+        private static void CompareAttributes(string elementKey, IEnumerable<IGrouping<string, Grouped<XAttribute>>> groupOfXmlElements, List<Diff> diffs)
         {
-            foreach (var groupOfIdenticallyNamedAttributes in @group)
+            foreach (var groupOfIdenticallyNamedAttributes in groupOfXmlElements)
             {
                 if (groupOfIdenticallyNamedAttributes.Count() > 2)
                 {
@@ -115,7 +121,6 @@ namespace XdtExtract
         {
             public Source Source { get; set; }
             public T Item { get; set; }
-
         }
 
         private enum Source

@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AppConfigComparer.cs" />
     <Compile Include="XDocumentExtensions.cs" />
+    <Compile Include="XmlMapGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

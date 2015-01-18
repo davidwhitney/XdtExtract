@@ -15,6 +15,36 @@ namespace XdtExtract.Test.Unit
             _comparer = new AppSettingsComparer();
         }
 
+        [TestCase(@"<add key=""Value"" value=""true"" />", "")]
+        [TestCase("", @"<add key=""Value"" value=""true"" />")]
+        [TestCase(@"<add key=""Value"" value=""true"" />", @"<add key=""Value"" value=""false"" />")]
+        [TestCase(@"<add key=""Value"" />", @"<add key=""Value"" value=""false"" />")]
+        [TestCase(@"<add key=""Value""  value=""false""/>", @"<add key=""Value"" />")]
+        public void DetectChanges_WithChangesOfMultipleTypes_DiffHighlightsCorrectXPath(string baseContent, string comparisonContent)
+        {
+            var @base = ConfigWithSettings(baseContent);
+            var comparison = ConfigWithSettings(comparisonContent);
+            
+            var diffs = _comparer.Compare(@base, comparison).ToList();
+
+            Assert.That(diffs[0].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
+        }
+
+        [TestCase(@"<add key=""Value"" value=""true"" />", "")]
+        [TestCase("", @"<add key=""Value"" value=""true"" />")]
+        [TestCase(@"<add key=""Value"" value=""true"" />", @"<add key=""Value"" value=""false"" />")]
+        [TestCase(@"<add key=""Value"" />", @"<add key=""Value"" value=""false"" />")]
+        [TestCase(@"<add key=""Value""  value=""false""/>", @"<add key=""Value"" />")]
+        public void DetectChanges_WithChangesOfMultipleTypes_DiffContainsTheCorrectCountOfChanges(string baseContent, string comparisonContent)
+        {
+            var @base = ConfigWithSettings(baseContent);
+            var comparison = ConfigWithSettings(comparisonContent);
+            
+            var diffs = _comparer.Compare(@base, comparison).ToList();
+
+            Assert.That(diffs.Count(), Is.EqualTo(1));
+        }
+
         [Test]
         public void DetectChanges_WithAppConfigContainingSingleAppSettingThatGetsRemoved_ReturnsChange()
         {
@@ -23,7 +53,6 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs[0].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
             Assert.That(diffs[0].Type, Is.EqualTo(Operation.Remove));
         }
 
@@ -35,7 +64,6 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs[0].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
             Assert.That(diffs[0].Type, Is.EqualTo(Operation.Add));
         }
 
@@ -47,7 +75,6 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs[0].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
             Assert.That(diffs[0].Type, Is.EqualTo(Operation.Modify));
             Assert.That(diffs[0].DifferenceType, Is.EqualTo(DifferenceType.Attribute));
             Assert.That(diffs[0].Key, Is.EqualTo("value"));
@@ -64,11 +91,9 @@ namespace XdtExtract.Test.Unit
 
             Assert.That(diffs.Count, Is.EqualTo(2));
 
-            Assert.That(diffs[0].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
             Assert.That(diffs[0].Type, Is.EqualTo(Operation.Modify));
             Assert.That(diffs[0].NewValue, Is.EqualTo("false"));
 
-            Assert.That(diffs[1].XPath, Is.EqualTo(@"/configuration/appSettings/add[@key='Value']"));
             Assert.That(diffs[1].Type, Is.EqualTo(Operation.Add));
             Assert.That(diffs[1].NewValue, Is.EqualTo("blah"));
         }
