@@ -23,8 +23,6 @@ namespace XdtExtract
             MapDeltas(baseMap.Except(comparisonMap), diffs, Operation.Remove);
             MapModifications(diffs);
 
-            diffs.RemoveAll(x => x.Operation == Operation.Add && comparisonMap.Any(c => x.FullName == c.FullName));
-
             return diffs;
         }
 

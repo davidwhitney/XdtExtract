@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace XdtExtract
@@ -38,9 +39,9 @@ namespace XdtExtract
 
             public string InnerText
             {
-                get { return Xel.ToString(); }
+                get { return Xel.JustThisNodeText(); }
             }
-
+            
             public bool HasNoChildren
             {
                 get { return !Xel.Descendants().Any(); }
@@ -52,7 +53,21 @@ namespace XdtExtract
                 Xel = xel;
             }
 
-            public string ComparisonKey { get { return string.Join(":", FullName, InnerText); } }
+            public string ComparisonKey
+            {
+                get
+                {
+                    var summaryOfJustThisNode = InnerText;
+
+                    foreach (var child in Xel.Descendants())
+                    {
+                        summaryOfJustThisNode = summaryOfJustThisNode.Replace(child.JustThisNodeText(), "");
+                    }
+
+
+                    return string.Join(":", FullName, summaryOfJustThisNode);
+                }
+            }
 
             public override string ToString()
             {
@@ -78,5 +93,14 @@ namespace XdtExtract
             }
         }
 
+    }
+
+    public static class XElementExtensions
+    {
+        public static string JustThisNodeText(this XElement xel)
+        {
+            var line = xel.ToString().Replace(Environment.NewLine, " ");
+            return Regex.Replace(line, ">\\s*<", "><");
+        }
     }
 }
