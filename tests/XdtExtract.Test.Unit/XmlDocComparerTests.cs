@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
@@ -13,6 +14,18 @@ namespace XdtExtract.Test.Unit
         public void SetUp()
         {
             _comparer = new XmlDocComparer();
+        }
+
+        [Test]
+        public void DetectChanges_OnARealPairOfFiles_LetsSeeWhatHappens()
+        {
+            var @base = File.ReadAllText(@"Configs\A.config");
+            var other = File.ReadAllText(@"Configs\A.other.config");
+
+            var diffs = _comparer.Compare(@base, other);
+
+            Assert.That(diffs, Is.Not.Empty);
+            Assert.That(diffs.Count(), Is.EqualTo(5));
         }
 
         [Test]
