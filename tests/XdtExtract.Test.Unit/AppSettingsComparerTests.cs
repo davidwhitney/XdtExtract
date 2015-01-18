@@ -96,13 +96,10 @@ namespace XdtExtract.Test.Unit
             
             var diffs = _comparer.Compare(@base, comparison).ToList();
 
-            Assert.That(diffs.Count, Is.EqualTo(2));
+            Assert.That(diffs.Count, Is.EqualTo(1));
 
             Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Modify));
-            Assert.That(diffs[0].FinalValue, Is.EqualTo("false"));
-
-            Assert.That(diffs[1].Operation, Is.EqualTo(Operation.Add));
-            Assert.That(diffs[1].FinalValue, Is.EqualTo("blah"));
+            Assert.That(diffs[0].FinalValue.ToString(), Is.StringContaining("value=\"false\" value1=\"blah\""));
         }
 
 
