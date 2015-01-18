@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="XmlMapGeneratorTests.cs" />
-    <Compile Include="AppSettingsComparerTests.cs" />
+    <Compile Include="XmlDocComparerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

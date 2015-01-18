@@ -4,9 +4,14 @@ using System.Xml.Linq;
 
 namespace XdtExtract
 {
-    public class AppSettingsComparer : ComparerBase
+    public class XmlDocComparer
     {
-        public override IEnumerable<Diff> Compare(XDocument @base, XDocument comparison)
+        public IEnumerable<Diff> Compare(string @base, string comparison)
+        {
+            return Compare(XDocument.Parse(@base), XDocument.Parse(comparison));
+        }
+
+        public IEnumerable<Diff> Compare(XDocument @base, XDocument comparison)
         {
             var diffs = new List<Diff>();
 

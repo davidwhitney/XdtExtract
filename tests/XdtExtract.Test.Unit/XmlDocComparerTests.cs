@@ -5,14 +5,14 @@ using NUnit.Framework;
 namespace XdtExtract.Test.Unit
 {
     [TestFixture]
-    public class AppSettingsComparerTests
+    public class XmlDocComparerTests
     {
-        private AppSettingsComparer _comparer;
+        private XmlDocComparer _comparer;
 
         [SetUp]
         public void SetUp()
         {
-            _comparer = new AppSettingsComparer();
+            _comparer = new XmlDocComparer();
         }
 
         [Test]
