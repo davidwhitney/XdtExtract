@@ -102,6 +102,19 @@ namespace XdtExtract.Test.Unit
             Assert.That(diffs[0].FinalValue.ToString(), Is.StringContaining("value=\"false\" value1=\"blah\""));
         }
 
+        [Test]
+        public void DetectChanges_WithALoadOfRandomStuff_DetectsChanges()
+        {
+            var @base = @"<?xml version=""1.0"" encoding=""utf-8""?><configuration><a>123</a></configuration>";
+            var comparison = @"<?xml version=""1.0"" encoding=""utf-8""?><configuration><a>456</a></configuration>";
+            
+            var diffs = _comparer.Compare(@base, comparison).ToList();
+
+            Assert.That(diffs.Count, Is.EqualTo(1));
+
+            Assert.That(diffs[0].Operation, Is.EqualTo(Operation.Modify));
+            Assert.That(diffs[0].FinalValue.ToString(), Is.StringContaining("<a>456</a>"));
+        }
 
         private static string ConfigWithSettings(string xml = "")
         {

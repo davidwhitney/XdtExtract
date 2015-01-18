@@ -92,7 +92,6 @@ namespace XdtExtract
                 return (ComparisonKey != null ? ComparisonKey.GetHashCode() : 0);
             }
         }
-
     }
 
     public static class XElementExtensions

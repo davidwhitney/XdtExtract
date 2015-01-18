@@ -56,7 +56,7 @@ namespace XdtExtract
                 var diff = new Diff
                 {
                     FullName = item.FullName,
-                    Key = item.Xel.Attributes().Key(),
+                    Key = item.Xel.Attributes().Key() ?? item.Xel.Name.LocalName,
                     Operation = op,
                     FinalValue = item.Xel
                 };
